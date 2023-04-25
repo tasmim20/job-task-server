@@ -20,16 +20,46 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const sectorsCollection = client
-      .db("jobTask")
-      .collection("sectorsSelections");
+    const sectorsCollection = client.db("jobTask").collection("sectorsSelections");
+    const selectionsCollection = client.db("jobTask").collection("selections");
 
+
+      //sectors get api
     app.get("/sectors", async (req, res) => {
       const query = {};
       const cursor = sectorsCollection.find(query);
       const sectors = await cursor.toArray();
       res.send(sectors);
     });
+
+  //selections get api
+  app.get('/selections', async (req, res)=>{
+    const result = await selectionsCollection.find({}).toArray();
+    if(result.length){
+        res.send({result, success: true})
+    }
+    else{
+        res.send({success: false, message: 'Something went wrong'})
+    }
+})
+
+
+
+   //sectors selection post api
+   app.post('/selections', async(req, res) =>{
+    const selection = req.body;
+    const result = await selectionsCollection.insertOne(selection);
+    if(result.insertedId){
+        res.send({result, success: true})
+    }
+    else{
+        res.send({success: false, message : 'Something went wrong'})
+    }
+   })
+   
+
+
+
   } finally {
   }
 }
